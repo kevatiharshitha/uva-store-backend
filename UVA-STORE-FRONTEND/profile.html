@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background: linear-gradient(135deg, #1e1e2f, #2b5876, #4e4376);
+    color:#fff;
+    height:100vh;
+}
+
+/* CENTER CONTENT */
+.wrapper{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+/* CARD */
+.card{
+    width:350px;
+    padding:25px;
+    border-radius:15px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    animation: fadeIn 0.6s ease;
+}
+
+/* INPUTS */
+input{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:6px;
+    background:#2a2a2a;
+    color:#fff;
+}
+
+/* BUTTONS */
+button{
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin-right:10px;
+    transition:0.3s;
+}
+
+/* SAVE BUTTON */
+.save-btn{
+    background: linear-gradient(45deg,#00c6ff,#0072ff);
+    color:#fff;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn{
+    background: linear-gradient(45deg,#ff4b2b,#ff416c);
+    color:#fff;
+}
+
+button:hover{
+    transform: scale(1.1);
+}
+
+/* GLOW BACKGROUND */
+.bg-glow{
+    position:fixed;
+    width:400px;
+    height:400px;
+    background: radial-gradient(circle, rgba(0,212,255,0.4), transparent);
+    top:20%;
+    left:30%;
+    filter: blur(120px);
+    z-index:-1;
+    animation: moveGlow 8s infinite alternate;
+}
+
+@keyframes moveGlow{
+    from{ transform: translate(-50px, -50px);}
+    to{ transform: translate(50px, 50px);}
+}
+
+/* ANIMATION */
+@keyframes fadeIn{
+    from{opacity:0; transform: translateY(20px);}
+    to{opacity:1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="wrapper">
+
+    <div class="card">
+        <h2>👤 Profile</h2>
+
+        <p><b>Name:</b></p>
+        <input id="name">
+
+        <p><b>Email:</b></p>
+        <input id="email">
+
+        <p><b>User ID:</b><br> <span id="uid"></span></p>
+
+        <br>
+        <button class="save-btn" onclick="updateProfile()">Save</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+</div>
+
+<script>
+
+// 🔒 check login
+if(!localStorage.getItem("user_id")){
+    window.location.href = "login.html";
+}
+
+let user_id = localStorage.getItem("user_id");
+
+// 🔥 load profile
+async function loadProfile(){
+
+    let res = await fetch(`http://localhost:4000/profile?user_id=${user_id}`);
+    let data = await res.json();
+
+    document.getElementById("name").value = data.name || "";
+    document.getElementById("email").value = data.email || "";
+    document.getElementById("uid").innerText = user_id;
+}
+
+// 🔥 update profile
+async function updateProfile(){
+
+    let name = document.getElementById("name").value;
+    let email = document.getElementById("email").value;
+
+    let res = await fetch("http://localhost:4000/profile",{
+        method:"PUT",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:`user_id=${user_id}&name=${name}&email=${email}`
+    });
+
+    let txt = await res.text();
+    alert(txt);
+}
+
+// 🔥 logout
+function logout(){
+    localStorage.removeItem("user_id");
+    window.location.href = "login.html";
+}
+
+loadProfile();
+
+</script>
+
+</body>
+</html>

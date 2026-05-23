@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register - Bazaar+</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.box{
+    background:#fff;
+    padding:30px;
+    width:320px;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.3);
+    text-align:center;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    background:#2874f0;
+    border:none;
+    color:#fff;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0b5ed7;
+}
+
+a{
+    display:block;
+    margin-top:10px;
+    color:#2874f0;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>Create Account</h2>
+
+    <input type="text" id="name" placeholder="Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="register()">Register</button>
+
+    <a href="login.html">Already have an account? Login</a>
+</div>
+
+<script>
+
+async function register(){
+
+    let name = document.getElementById("name").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    // 🔴 basic validation
+    if(!name || !email || !password){
+        alert("Please fill all fields");
+        return;
+    }
+
+    let res = await fetch("http://localhost:4000/register",{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:`name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+    });
+
+    let text = await res.text();
+    console.log("REGISTER RESPONSE:", text);
+
+    if(text === "Exists"){
+        alert("User already exists");
+    }else{
+        alert("Registered successfully!");
+        window.location.href = "login.html";
+    }
+}
+
+</script>
+
+</body>
+</html>

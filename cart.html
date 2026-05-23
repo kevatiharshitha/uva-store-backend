@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cart - UVA STORE</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background: linear-gradient(135deg,#1e1e2f,#2b5876,#4e4376);
+    background-size:300% 300%;
+    animation:bgMove 10s infinite;
+    color:#fff;
+}
+
+/* BACKGROUND ANIMATION */
+
+@keyframes bgMove{
+
+    0%{
+        background-position:0% 50%;
+    }
+
+    50%{
+        background-position:100% 50%;
+    }
+
+    100%{
+        background-position:0% 50%;
+    }
+}
+
+/* HEADER */
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:15px 25px;
+
+    background: rgba(0,0,0,0.6);
+
+    backdrop-filter:blur(10px);
+}
+
+.back-btn{
+    cursor:pointer;
+    font-size:18px;
+}
+
+/* MAIN */
+
+.container{
+    padding:20px;
+}
+
+.cart{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+}
+
+/* PRODUCT CARD */
+
+.card{
+
+    width:230px;
+
+    padding:15px;
+
+    border-radius:15px;
+
+    background: rgba(255,255,255,0.05);
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:scale(1.03);
+}
+
+.card img{
+
+    width:100%;
+    height:140px;
+
+    object-fit:cover;
+
+    border-radius:10px;
+}
+
+.card h3{
+    margin-top:15px;
+}
+
+.price{
+
+    color:#00ffcc;
+
+    font-size:28px;
+
+    font-weight:bold;
+}
+
+/* REMOVE BUTTON */
+
+.remove{
+
+    width:100%;
+
+    margin-top:15px;
+
+    padding:10px;
+
+    background:red;
+
+    border:none;
+
+    border-radius:8px;
+
+    color:#fff;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.remove:hover{
+    transform:scale(1.03);
+}
+
+/* TOTAL */
+
+.total{
+
+    margin-top:30px;
+
+    font-size:35px;
+
+    font-weight:bold;
+}
+
+/* BUY BUTTON */
+
+.buy-btn{
+
+    display:block;
+
+    margin:30px auto;
+
+    padding:14px;
+
+    width:220px;
+
+    background: linear-gradient(45deg,#ff9f00,#ff5e00);
+
+    border:none;
+
+    border-radius:12px;
+
+    color:#fff;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.buy-btn:hover{
+
+    transform:scale(1.05);
+
+    box-shadow:0 0 15px #ff9f00;
+}
+
+/* EMPTY CART */
+
+.empty{
+
+    text-align:center;
+
+    margin-top:80px;
+
+    font-size:30px;
+}
+
+/* PAYMENT POPUP */
+
+.payment-box{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.8);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    z-index:999;
+}
+
+.payment-content{
+
+    background:#111;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    box-shadow:0 0 20px #00d4ff;
+
+    width:350px;
+}
+
+.payment-content h2{
+    color:#00d4ff;
+}
+
+.qr{
+
+    width:250px;
+
+    margin:20px 0;
+
+    border-radius:15px;
+}
+
+.payment-content button{
+
+    padding:12px 20px;
+
+    margin:10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:16px;
+}
+
+.pay-btn{
+
+    background:#00d4ff;
+
+    color:#000;
+}
+
+.cancel-btn{
+
+    background:red;
+
+    color:#fff;
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+    .cart{
+        justify-content:center;
+    }
+
+    .total{
+        font-size:28px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<div class="header">
+
+    <div class="back-btn" onclick="goBack()">
+        ⬅ Back
+    </div>
+
+    <h2>🛒 Your Cart</h2>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="container">
+
+    <div id="cart" class="cart"></div>
+
+    <div id="total" class="total"></div>
+
+    <button class="buy-btn" onclick="buyAll()">
+        Buy All
+    </button>
+
+</div>
+
+<!-- PAYMENT POPUP -->
+
+<div id="paymentBox" class="payment-box">
+
+    <div class="payment-content">
+
+        <h2>Scan & Pay</h2>
+
+        <img src="qr.png" class="qr">
+
+        <h3 id="payAmount"></h3>
+
+        <p>
+            Scan using GPay / PhonePe / Paytm
+        </p>
+
+        <button class="pay-btn" onclick="paymentDone()">
+            Payment Completed
+        </button>
+
+        <button class="cancel-btn" onclick="closePayment()">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* USER */
+let user_id =
+    localStorage.getItem("user_id");
+
+/* PAYMENT */
+
+let payment_id = "";
+
+/* LOAD CART */
+
+async function loadCart(){
+
+    let res =
+        await fetch(
+            `http://localhost:4000/cart?user_id=${user_id}`
+        );
+
+    let data =
+        await res.json();
+
+    let html = "";
+
+    let total = 0;
+
+    /* EMPTY */
+
+    if(data.length === 0){
+
+        html = `
+        <div class="empty">
+            🛒 Cart is Empty
+        </div>
+        `;
+
+        document.getElementById("total")
+            .innerText = "";
+
+    }else{
+
+        /* PRODUCTS */
+
+        data.forEach(c=>{
+
+            total += c.price;
+
+            html += `
+
+            <div class="card">
+
+                <img src="${c.image}">
+
+                <h3>${c.name}</h3>
+
+                <p class="price">
+                    ₹${c.price}
+                </p>
+
+                <button
+                    class="remove"
+                    onclick="removeItem('${c.id}')">
+
+                    Remove
+
+                </button>
+
+            </div>
+
+            `;
+        });
+
+        document.getElementById("total")
+            .innerText =
+                "Total: ₹ " + total;
+    }
+
+    document.getElementById("cart")
+        .innerHTML = html;
+}
+
+/* REMOVE */
+
+async function removeItem(id){
+
+    await fetch(
+        `http://localhost:4000/cart?id=${id}`,
+        {
+            method:"DELETE"
+        }
+    );
+
+    loadCart();
+}
+
+/* BUY */
+
+async function buyAll(){
+
+    console.log("BUY BUTTON CLICKED");
+
+    let totalText =
+        document.getElementById("total")
+        .innerText;
+
+    let amount =
+        totalText.replace("Total: ₹ ","");
+
+    /* SHOW POPUP */
+
+    document.getElementById("payAmount")
+        .innerText =
+            "Pay ₹ " + amount;
+
+    document.getElementById("paymentBox")
+        .style.display = "flex";
+
+    /* CREATE PAYMENT */
+
+    try{
+
+        let res = await fetch(
+            "http://localhost:4000/create-payment",
+            {
+                method:"POST"
+            }
+        );
+
+        let data =
+            await res.json();
+
+        payment_id =
+            data.payment_id;
+
+        console.log(payment_id);
+
+    }catch(err){
+
+        console.log(err);
+    }
+}
+
+/* CLOSE POPUP */
+
+function closePayment(){
+
+    document.getElementById("paymentBox")
+        .style.display = "none";
+}
+
+/* PAYMENT DONE */
+
+async function paymentDone(){
+
+    try{
+
+        let user_id =
+            localStorage.getItem("user_id");
+
+        let res = await fetch(
+            "http://localhost:4000/complete-payment",
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    user_id:user_id
+                })
+            }
+        );
+
+        let txt =
+            await res.text();
+
+        showToast(txt);
+
+        closePayment();
+
+        loadCart();
+
+        // GO TO ORDERS PAGE
+        window.location.href =
+            "orders.html";
+
+    }catch(err){
+
+        console.log(err);
+
+        showToast("❌ Server Not Running");
+    }
+}
+/* START */
+
+loadCart();
+
+function goBack(){
+
+    window.location.href = "index.html";
+}
+
+function showToast(message){
+
+    let toast =
+        document.createElement("div");
+
+    toast.innerText = message;
+
+    toast.style.position = "fixed";
+
+    toast.style.bottom = "30px";
+
+    toast.style.right = "30px";
+
+    toast.style.background = "#00c853";
+
+    toast.style.color = "white";
+
+    toast.style.padding = "15px 25px";
+
+    toast.style.borderRadius = "10px";
+
+    toast.style.fontSize = "18px";
+
+    toast.style.fontWeight = "bold";
+
+    toast.style.zIndex = "9999";
+
+    toast.style.boxShadow =
+        "0 0 15px rgba(0,0,0,0.5)";
+
+    toast.style.animation =
+        "fadeIn 0.3s ease";
+
+    document.body.appendChild(toast);
+
+    setTimeout(()=>{
+
+        toast.remove();
+
+    },3000);
+}
+
+</script>
+
+</body>
+</html>
