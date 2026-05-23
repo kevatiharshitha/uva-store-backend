@@ -9,8 +9,12 @@ public class MainServer {
 
     public static void main(String[] args) throws Exception {
 
-        HttpServer server = HttpServer.create(new InetSocketAddress(4000), 0);
+        int port = Integer.parseInt(
+                System.getenv().getOrDefault("PORT", "4000"));
 
+        HttpServer server = HttpServer.create(
+                new InetSocketAddress(port),
+                0);
         server.createContext("/register", new RegisterHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/products", new ProductHandler());
